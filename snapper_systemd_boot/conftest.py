@@ -14,10 +14,9 @@ def snapper():
 
 @pytest.fixture
 def config(tmpdir):
-    image_source_path = Path(tmpdir.mkdir("image_source"))
     systemd_entries_path = Path(tmpdir.mkdir("systemd_entries"))
     entry_template = dedent("""
-        title Arch Linux (Snapshot {date} [{snapshot.num}])
+        title Arch Linux (Snapshot {snapshot.iso_timestamp} [{snapshot.num}])
         linux /vmlinuz-linux
         initrd /initramfs-linux.img
         options \
@@ -27,7 +26,6 @@ def config(tmpdir):
     """)
 
     yield SnapperSystemDBootConfig(
-        image_source_path=image_source_path,
         systemd_entries_path=systemd_entries_path,
         entry_prefix="arch-auto-snapshot-",
         entry_template=entry_template)

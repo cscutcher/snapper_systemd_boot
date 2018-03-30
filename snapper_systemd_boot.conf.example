@@ -1,13 +1,14 @@
 [DEFAULT]
 
-IMAGES_SOURCE = /boot
+KERNEL_IMAGE_SOURCE = .bootbackup/pre/vmlinuz-linux
+INITRAMFS_IMAGE_SOURCE = .bootbackup/pre/initramfs-linux.img
+
+IMAGES_SNAPSHOT_DIR = /boot/snapper
 SYSTEMD_ENTRIES = /boot/loader/entries
+
 ENTRY_PREFIX = arch-auto-snapshot-
 ENTRY_TEMPLATE =
-    title Arch Linux (Snapshot {date} [{snapshot.num}])
+    title Arch Linux (Snapshot {snapshot.iso_timestamp} [{snapshot.num}])
     linux /vmlinuz-linux
     initrd /initramfs-linux.img
-    options \
-        cryptdevice=UUID=d79c85d5-0ed6-4b92-b3dd-e7b6fc7dee9f:aeryn-root-crypt\
-        root=/dev/mapper/aeryn-root-crypt quiet rw\
-        rootflags=subvol=@/.snapshots/{snapshot.num}/snapshot
+    options cryptdevice=UUID=d79c85d5-0ed6-4b92-b3dd-e7b6fc7dee9f:aeryn-root-crypt root=/dev/mapper/aeryn-root-crypt quiet rw rootflags=subvol=@/.snapshots/{snapshot.num}/snapshot

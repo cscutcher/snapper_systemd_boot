@@ -5,6 +5,7 @@ Main module for managing systemd-boot entries from snapper snapshots.
 import logging
 from pathlib import Path
 
+from distutils.util import strtobool
 import pytest
 
 DEV_LOGGER = logging.getLogger(__name__)
@@ -23,25 +24,38 @@ def test_get_root_config(inst):
     assert path == str(root_config.path) == "/"
 
 
-def test_get_root_snapshots(inst):
-    snapshots = inst.get_root_snapshots()
-    assert snapshots[0].description == "current"
+def test_write_entries(inst):
+    inst.write_boot_entries()
 
 
-def test_generate_configs(inst):
-    inst.generate_boot_configs()
+def test_generate_entries(inst):
+    for entry in inst.get_boot_entries():
+        print(entry)
 
 
 class BootEntry:
     """Boot entry generated from snapshot."""
+    class SnapshotWrapper:
+        def __init__(self, entry, snapshot):
+            self.entry = entry
+            self.snapshot = snapshot
+
+        def __getattr__(self, name):
+            return getattr(self.snapshot, name)
 
     def __init__(self, snapshot, config):
         self.snapshot = snapshot
         self.config = config
 
+    @property
+    def copy_images(self):
+        return strtobool(
+            self.snapshot.userdata.get("copy_images", False)
+        )
+
     def get_contents(self):
-        return self.config.entry_template.format(
-            snapshot=self.snapshot, date=self.snapshot.date.isoformat())
+        snapshot = self.SnapshotWrapper(self, self.snapshot)
+        return self.config.entry_template.format(snapshot=snapshot)
 
     def get_entry_path(self):
         name = "{config.entry_prefix}{snapshot.num}.conf".format(
@@ -68,18 +82,24 @@ class SnapperSystemDBootManager:
                 return config
         raise KeyError("Unable to find root config.")
 
-    def get_root_snapshots_iter(self):
+    def get_snapshots_iter(self):
         config = self.get_root_config()
-        return self.snapper.get_snapshots_iter(config.name)
-
-    def get_root_snapshots(self):
-        return list(self.get_root_snapshots_iter())
-
-    def generate_boot_configs(self):
-        for snapshot in self.get_root_snapshots_iter():
+        for snapshot in self.snapper.get_snapshots_iter(config.name):
             if snapshot.description == "current":
                 continue
-            entry = BootEntry(snapshot, self.config)
+            if "bootable" in snapshot.userdata:
+                is_bootable = strtobool(snapshot.userdata["bootable"].lower())
+                if not is_bootable:
+                    continue
+
+            yield snapshot
+
+    def get_boot_entries(self):
+        for snapshot in self.get_snapshots_iter():
+            yield BootEntry(snapshot, self.config)
+
+    def write_boot_entries(self):
+        for entry in self.get_boot_entries():
             entry.write()
 
     def get_existing_entries(self):

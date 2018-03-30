@@ -12,7 +12,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "snapper-systemd-boot = snapper_systemd_boot.main:main",
+            "snapper-systemd-boot = snapper_systemd_boot.cli:main",
         ]
     }
 )

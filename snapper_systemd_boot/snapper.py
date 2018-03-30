@@ -1,10 +1,26 @@
+# -*- coding: utf-8 -*-
+"""
+Wrap Snapper DBUS client.
+
+In a few places I convert dbus types to native. I know this isn't strictly
+necessary, as the dbus ones subclass the native, but it was irritating when
+dumping repr to console, and I really didn't need the dbus metadata.
+"""
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
+import logging
 
 from reprutils import GetattrRepr
 
 import dbus
+
+DEV_LOGGER = logging.getLogger(__name__)
+
+
+def test_get_snapshots(snapper):
+    snapshot = next(snapper.get_snapshots_iter("root"))
+    assert snapshot.description == "current"
 
 
 class SnapshotType(Enum):
@@ -54,7 +70,7 @@ class Snapshot:
             num,
             type_raw,
             pre_num,
-            date,
+            timestamp,
             uid,
             description,
             cleanup,
@@ -62,21 +78,29 @@ class Snapshot:
         self.type = SnapshotType(type_raw)
         self.num = int(num)
         self.pre_num = int(pre_num)
-        self.date = datetime.fromtimestamp(date)
+        self.timestamp = datetime.fromtimestamp(timestamp)
         self.uid = int(uid)
         self.description = str(description)
         self.cleanup = str(cleanup)
-        self.userdata = userdata
+        self.userdata = {
+            str(key): str(value)
+            for key, value in userdata.items()
+        }
+
+    @property
+    def iso_timestamp(self):
+        """
+        Outputs timestamp in isoformat string.
+        """
+        return self.timestamp.isoformat()
 
     __repr__ = GetattrRepr(
         "num",
         "type",
         pre_num="pre_num",
-        data="date",
+        timestamp="timestamp",
         uid="uid",
         description="description",
         cleanup="cleanup",
+        userdata="userdata",
     )
-
-    def __str__(self):
-        return f"Snapshot({self.num}, {self.type}, {self.description!r})"
