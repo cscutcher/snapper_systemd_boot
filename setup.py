@@ -5,8 +5,14 @@ setup(
     packages=find_packages(),
     install_requires=[
         "reprutils",
+        "argh",
     ],
     extras_require={
         "dev": ["pytest"],
     },
+    entry_points={
+        "console_scripts": [
+            "snapper-systemd-boot = snapper_systemd_boot.main:main",
+        ]
+    }
 )
