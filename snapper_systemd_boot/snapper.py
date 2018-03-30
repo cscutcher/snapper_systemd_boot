@@ -48,7 +48,11 @@ class Snapper:
 
     def get_snapshots_iter(self, config_name):
         for snapshot in self.snapper.ListSnapshots(config_name):
-            yield Snapshot(*snapshot)
+            snapshot = Snapshot(*snapshot)
+            snapshot.mount_point = Path(
+                self.snapper.GetMountPoint(
+                    config_name, snapshot.num))
+            yield snapshot
 
 
 class SnapperConfig:
@@ -74,7 +78,9 @@ class Snapshot:
             uid,
             description,
             cleanup,
-            userdata):
+            userdata,
+            mount_point=None,
+            ):
         self.type = SnapshotType(type_raw)
         self.num = int(num)
         self.pre_num = int(pre_num)
@@ -86,6 +92,7 @@ class Snapshot:
             str(key): str(value)
             for key, value in userdata.items()
         }
+        self.mount_point = mount_point
 
     @property
     def iso_timestamp(self):
@@ -103,4 +110,5 @@ class Snapshot:
         description="description",
         cleanup="cleanup",
         userdata="userdata",
+        mount_point="mount_point",
     )

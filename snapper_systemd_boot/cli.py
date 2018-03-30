@@ -77,6 +77,7 @@ class SnapshotListWrapper:
                 created: {s.iso_timestamp}
                 type: {s.type.name}
                 user_data: {s.userdata_compact_str:.70}
+                mount_point: {s.mount_point}
         """.format(s=self))
 
 

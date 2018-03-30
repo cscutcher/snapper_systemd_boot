@@ -15,6 +15,7 @@ def snapper():
 @pytest.fixture
 def config(tmpdir):
     systemd_entries_path = Path(tmpdir.mkdir("systemd_entries"))
+
     entry_template = dedent("""
         title Arch Linux (Snapshot {snapshot.iso_timestamp} [{snapshot.num}])
         linux /vmlinuz-linux
