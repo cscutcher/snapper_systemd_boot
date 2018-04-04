@@ -9,6 +9,12 @@ probably places where it's currently specific to my particular environment.
 If there's anything I can do to help it work for you feel free raise an issue
 or submit a PR.
 
+The primary location for this project is
+[GitLab](https://gitlab.com/cscutcher/snapper_systemd_boot).
+A mirror is maintained on
+[github](https://github.com/cscutcher/snapper_systemd_boot)
+just for visibility.
+
 # Not production ready!
 As I say this was hacked up over a weekend and is relatively untested and
 specific to my requirements. I'm not even sure it's a good idea!
