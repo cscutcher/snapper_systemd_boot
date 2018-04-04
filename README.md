@@ -145,3 +145,5 @@ fix an issue, but its probably a good idea to have at least one snapshot using
 * Package on Pypi
 * AUR package
 * CI
+* On update all entries are remove before being recreated, this leaves a window
+  in which something going wrong could leave us without boot entries.
