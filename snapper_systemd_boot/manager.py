@@ -120,8 +120,11 @@ class BootEntry:
 
     @property
     def subvol(self):
-        return Path("@/.snapper_systemd_boot/{self.snapshot.num}".format(
-            self=self))
+        return (
+            self.config.root_subvolume /
+            ".snapper_systemd_boot/{self.snapshot.num}".format(
+                self=self)
+        )
 
     def get_contents(self):
         ctx = self.EntryTemplateContext(entry=self, snapshot=self.snapshot)
@@ -175,8 +178,10 @@ class SnapperSystemDBootManager:
             entry.write()
             writable_snapshot_dir = Path("/.snapper_systemd_boot")
             writable_snapshot_dir.mkdir(exist_ok=True)
-            writable_snapshot_path = writable_snapshot_dir / str(entry.snapshot.num)
-            sh.btrfs.subvolume.snapshot(entry.snapshot.mount_point, writable_snapshot_path)
+            writable_snapshot_path = (
+                writable_snapshot_dir / str(entry.snapshot.num))
+            sh.btrfs.subvolume.snapshot(
+                entry.snapshot.mount_point, writable_snapshot_path)
 
             if entry.copy_images:
                 DEV_LOGGER.info("Copying images")

@@ -99,6 +99,5 @@ fix an issue, but its probably a good idea to have at least one snapshot using
 
 # TODO
 * Add example hooks.
-* Use `ROOT_SUBVOLUME` from config.
 * Protection around snapper or `snapper_systemd_boot` running while booted into
   snapshot.

@@ -15,6 +15,7 @@ class SnapperSystemDBootConfig:
             initramfs_image_source,
             images_snapshot_dir,
             boot_path,
+            root_subvolume,
             ):
         assert not ignore
 
@@ -38,6 +39,8 @@ class SnapperSystemDBootConfig:
             self.boot_path / self.images_snapshot_dir
         )
 
+        self.root_subvolume = Path(root_subvolume)
+
     @classmethod
     def from_filename(cls, filename):
         config = configparser.ConfigParser()
@@ -53,4 +56,5 @@ class SnapperSystemDBootConfig:
         initramfs_image_source="initramfs_image_source",
         images_snapshot_dir="images_snapshot_dir",
         boot_path="boot_path",
+        root_subvolume="root_subvolume",
     )

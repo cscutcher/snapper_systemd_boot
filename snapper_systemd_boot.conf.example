@@ -14,7 +14,7 @@ BOOT_PATH = /boot
 SYSTEMD_ENTRIES_PATH = /boot/loader/entries
 
 # Which subvolume contains the root partition.
-ROOT_SUBVOLUME="@"
+ROOT_SUBVOLUME = @
 
 # The filename prefix for snapshots. Be careful this does not conflict with
 # non-automated entries as it's used to automatically remove old entries.
