@@ -44,6 +44,9 @@ It'd be nice to have some integration tests. I think I might be able to do
 something with a docker container (it'd probably need privileged to work)
 or maybe LXC containers, but I haven't had much chance to play with the latter.
 
+The lack of decent testing is obviously and obstruction to any reasonable CI
+attempt.
+
 # My environment
 So that others can understand how to use this tool and design decisions.
 
@@ -128,3 +131,7 @@ fix an issue, but its probably a good idea to have at least one snapshot using
 * Protection around snapper or `snapper_systemd_boot` running while booted into
   snapshot.
 * Ability to test functionality around btrfs and snapper calls.
+* Reduce number of pip pre-requisites;
+    * While I quite like `reprutils` as a way to cleanly define a `repr`
+      that's std compliant, I could probably do without it.
+    * My limited use of the `sh` equally could probably be replaced with stdlib.

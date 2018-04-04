@@ -56,15 +56,27 @@ def test_generate_entries(inst):
 
 
 class BootEntry:
-    """Boot entry generated from snapshot."""
+    """
+    Boot entry generated from snapshot.
+
+    Manges a single boot entry, generated from a single snapper snapshot.
+    """
 
     class EntryTemplateContext:
+        """
+        This class wraps the entry and snapshot to provide some additional
+        useful variables when processing the entry templates.
+        """
         def __init__(self, entry, snapshot):
             self.entry = entry
             self.snapshot = snapshot
 
         @property
         def title_suffix(self):
+            """
+            A shortish string including the snapshot timestamp and description
+            to be used in titles for boot entries.
+            """
             MAX_DESCRIPTION_LENGTH = 20
             ELLIPSIS = "..."
 
@@ -89,6 +101,11 @@ class BootEntry:
                     short_description=short_description)
 
         def __getattr__(self, name):
+            """
+            Forward getattr to inner snapshot and entry.
+
+            Bit hacky, but conveniant for writing templates.
+            """
             if hasattr(self.snapshot, name):
                 return getattr(self.snapshot, name)
 
@@ -103,6 +120,12 @@ class BootEntry:
 
     @property
     def kernel_image_name(self):
+        """
+        Return the filename (not the full path) of kernel for the boot entry.
+
+        This differs depending on whether we going to use a frozen copy of the
+        kernel and initramfs, rather than just using the latest.
+        """
         if self.copy_images:
             return "vmlinuz-linux-{snapshot.num}".format(
                 snapshot=self.snapshot)
@@ -111,6 +134,13 @@ class BootEntry:
 
     @property
     def initramfs_image_name(self):
+        """
+        Return the filename (not the full path) of intiramfs image for the boot
+        entry.
+
+        This differs depending on whether we going to use a frozen copy of the
+        kernel and initramfs, rather than just using the latest.
+        """
         if self.copy_images:
             return "initramfs-linux-{snapshot.num}.img".format(
                 snapshot=self.snapshot)
@@ -119,6 +149,13 @@ class BootEntry:
 
     @property
     def image_dir(self):
+        """
+        The absolute path (within the boot partition) to where we expect to
+        find kernel and initramfs image.
+
+        This differs depending on whether we going to use a frozen copy of the
+        kernel and initramfs, rather than just using the latest.
+        """
         if self.copy_images:
             return Path("/") / self.config.images_snapshot_dir
         else:
@@ -126,20 +163,34 @@ class BootEntry:
 
     @property
     def kernel_image_path(self):
+        """
+        The full path (relative to the boot partition) to the kernel used for
+        the boot entry.
+        """
         return self.image_dir / self.kernel_image_name
 
     @property
     def initramfs_image_path(self):
+        """
+        The full path (relative to the boot partition) to the initramfs image
+        used for the boot entry.
+        """
         return self.image_dir / self.initramfs_image_name
 
     @property
     def copy_images(self):
+        """
+        Should we use a frozen copy of the kernel and initramfs image or not.
+        """
         return strtobool(
             self.snapshot.userdata.get("copy_images", "false")
         )
 
     @property
     def subvol(self):
+        """
+        Which subvolume will be root for this boot entry.
+        """
         return (
             self.config.root_subvolume /
             ".snapper_systemd_boot/{self.snapshot.num}".format(
@@ -147,15 +198,24 @@ class BootEntry:
         )
 
     def get_contents(self):
+        """
+        Get the contents of the entry that will be written.
+        """
         ctx = self.EntryTemplateContext(entry=self, snapshot=self.snapshot)
         return self.config.entry_template.format(entry=ctx)
 
     def get_entry_path(self):
+        """
+        Get the path the entry will be written too.
+        """
         name = "{config.entry_prefix}{snapshot.num}.conf".format(
             config=self.config, snapshot=self.snapshot)
         return self.config.systemd_entries_path / name
 
     def write(self):
+        """
+        Write the entry to disk.
+        """
         with open(self.get_entry_path(), 'w') as output:
             output.write(self.get_contents())
 
@@ -173,12 +233,21 @@ class SnapperSystemDBootManager:
         self.config = config
 
     def get_root_config(self):
+        """
+        Get the root snapper config
+
+        I.e. the snapper config backing up the root path `/`
+        """
         for config in self.snapper.get_configs_iter():
             if config.path == Path("/"):
                 return config
         raise KeyError("Unable to find root config.")
 
     def get_snapshots_iter(self):
+        """
+        Iterator to get the snapshot information for every snapper snapshot
+        that we wish to generate boot entries for.
+        """
         config = self.get_root_config()
         for snapshot in self.snapper.get_snapshots_iter(config.name):
             if snapshot.description == "current":
@@ -191,14 +260,26 @@ class SnapperSystemDBootManager:
             yield snapshot
 
     def get_boot_entries(self):
+        """
+        Get each BootEntry for each snapper snapshot we wish to generate boot
+        entries for.
+        """
         for snapshot in self.get_snapshots_iter():
             yield BootEntry(snapshot, self.config)
 
     def write_boot_entries(self):
+        """
+        Write boot entries, including required additional files and snapshots
+        to disk.
+
+        TODO: Move more of the functionality up to BootEntry.write
+        """
         DEV_LOGGER.info("Writing new entries...")
         for entry in self.get_boot_entries():
             DEV_LOGGER.info("Writing: %r", entry)
             entry.write()
+
+            # TODO: Remove this hardcoded string
             writable_snapshot_dir = Path("/.snapper_systemd_boot")
             writable_snapshot_dir.mkdir(exist_ok=True)
             writable_snapshot_path = (
@@ -229,10 +310,19 @@ class SnapperSystemDBootManager:
                 shutil.copyfile(initramfs_src, initramfs_dst)
 
     def get_existing_entries(self):
+        """
+        List boot entries that we have generated previously that exist on disk.
+        """
         glob = "{config.entry_prefix}*.conf".format(config=self.config)
         return self.config.systemd_entries_path.glob(glob)
 
     def remove_boot_configs(self):
+        """
+        Remove any generated boot entries, including required additional files
+        and snapshots from disk.
+
+        TODO: Move more of the functionality up to a BootEntry.remove?
+        """
         for p in self.get_existing_entries():
             DEV_LOGGER.info("Removing: %s", p)
             p.unlink()

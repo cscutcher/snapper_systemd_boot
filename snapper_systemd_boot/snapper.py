@@ -45,11 +45,19 @@ class Snapper:
         )
 
     def get_configs_iter(self):
+        """
+        Get all snapper configs wrapped in helper class.
+        """
         configs = self.snapper.ListConfigs()
         for config in configs:
             yield SnapperConfig(*config)
 
     def get_snapshots_iter(self, config_name):
+        """
+        Get all existing snapshots for config.
+
+        Also discover the mountpoint for each snapshot on filesystem.
+        """
         for snapshot in self.snapper.ListSnapshots(config_name):
             snapshot = Snapshot(*snapshot)
             snapshot.mount_point = Path(
@@ -72,6 +80,9 @@ class SnapperConfig:
 
 
 class Snapshot:
+    """
+    Wrap individual snapper snapshot.
+    """
     def __init__(
             self,
             num,

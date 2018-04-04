@@ -1,10 +1,44 @@
+"""
+Module to access config for snapper_systemd_boot.
+
+This is a bit of a mess. I was trying to keep it simple, but as it's grown
+it might need refactoring to reduce the duplication and make the validation
+more obvious.
+
+TODO: Cleanup this module. Use some schema based library maybe like Colander or
+      zope.schema.
+"""
 from pathlib import Path
 import configparser
 
 from reprutils import GetattrRepr
+import pytest
+
+
+@pytest.mark.real_config
+def test_load_example_config():
+    """
+    Test loading the example config.
+
+    TODO: Add some assertions.
+    TODO: While loading the example config is a useful validation that the
+          makes sense, the validation following the load checks real file
+          locations hence the `real_config` test marker.
+          I could make the example config less "real" and use temporary
+          directories that could be pregenerated but that makes the example
+          less useful.
+    """
+    config = SnapperSystemDBootConfig.from_filename(
+        "snapper_systemd_boot.conf.example")
+    print(config)
 
 
 class SnapperSystemDBootConfig:
+    """
+    Stores config for SnapperSystemDBootConfig.
+
+    See example config for description of what fields do.
+    """
     def __init__(
             self,
             *ignore,
@@ -43,6 +77,9 @@ class SnapperSystemDBootConfig:
 
     @classmethod
     def from_filename(cls, filename):
+        """
+        Load config from INI at given filename.
+        """
         config = configparser.ConfigParser()
         config.read(filename)
         section = config["DEFAULT"]
