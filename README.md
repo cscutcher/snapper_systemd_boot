@@ -15,16 +15,16 @@ specific to my requirements. I'm not even sure it's a good idea!
 
 At least read all the `README.md`. One specific warning though **there may be
 unintended consequences if snapper, or snapper_systemd_boot run while booted
-into a snapshot. BUYER BEWARE!** 
+into a snapshot. BUYER BEWARE!**
 
 # Testing
-I started with good intentions, but I've been really naughty with the testing. 
+I started with good intentions, but I've been really naughty with the testing.
 
 Early on I was using a lot of pre-canned tests to help me develop the thing but
 I didn't have time to invest in mocking out DBUS or btrfs functions so most of
-the tests expect real config and call out to real snapper or btrfs. 
+the tests expect real config and call out to real snapper or btrfs.
 
-Some even write to disk in a way that may be dangerous. 
+Some even write to disk in a way that may be dangerous.
 
 I've marked tests appropriately and you can see which groups to run with;
 
