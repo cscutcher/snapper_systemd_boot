@@ -72,7 +72,9 @@ So that others can understand how to use this tool and design decisions.
    virtualenv or `--user` installation will suffice.
    However global installation is advised.
 2. Use example config to create `/etc/snapper_systemd_boot.conf`
-3. Install hook to run updates. TODO
+3. Add crontab entry to update entries at regular intervals.
+   Unfortunately there appears not to be hooks for snapper to allow this to be
+   triggered automatically after snapshot creation.
 
 ### Running
 If hooks are installed then nothing else is required there are some useful
@@ -133,7 +135,6 @@ fix an issue, but its probably a good idea to have at least one snapshot using
 
 
 # TODO
-* Add example hooks.
 * Protection around snapper or `snapper_systemd_boot` running while booted into
   snapshot.
 * Ability to test functionality around btrfs and snapper calls.
