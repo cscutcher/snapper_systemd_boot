@@ -6,6 +6,7 @@ setup(
     install_requires=[
         "reprutils",
         "argh",
+        "sh",
     ],
     extras_require={
         "dev": ["pytest"],

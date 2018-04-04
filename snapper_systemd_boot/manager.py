@@ -8,6 +8,7 @@ import shutil
 
 from distutils.util import strtobool
 import pytest
+import sh
 
 DEV_LOGGER = logging.getLogger(__name__)
 
@@ -117,6 +118,11 @@ class BootEntry:
             self.snapshot.userdata.get("copy_images", "false")
         )
 
+    @property
+    def subvol(self):
+        return Path("@/.snapper_systemd_boot/{self.snapshot.num}".format(
+            self=self))
+
     def get_contents(self):
         ctx = self.EntryTemplateContext(entry=self, snapshot=self.snapshot)
         return self.config.entry_template.format(entry=ctx)
@@ -163,11 +169,20 @@ class SnapperSystemDBootManager:
             yield BootEntry(snapshot, self.config)
 
     def write_boot_entries(self):
+        DEV_LOGGER.info("Writing new entries...")
         for entry in self.get_boot_entries():
+            DEV_LOGGER.info("Writing: %r", entry)
             entry.write()
+            writable_snapshot_dir = Path("/.snapper_systemd_boot")
+            writable_snapshot_dir.mkdir(exist_ok=True)
+            writable_snapshot_path = writable_snapshot_dir / str(entry.snapshot.num)
+            sh.btrfs.subvolume.snapshot(entry.snapshot.mount_point, writable_snapshot_path)
+
             if entry.copy_images:
+                DEV_LOGGER.info("Copying images")
+
                 snapshot_dir = self.config.images_snapshot_dir_full
-                snapshot_dir.mkdir()
+                snapshot_dir.mkdir(exist_ok=True)
 
                 # Copy vmlinux
                 linux_src = (
@@ -194,7 +209,15 @@ class SnapperSystemDBootManager:
             DEV_LOGGER.info("Removing: %s", p)
             p.unlink()
 
+        writable_snapshot_dir = Path("/.snapper_systemd_boot")
+        if writable_snapshot_dir.is_dir():
+            for p in writable_snapshot_dir.iterdir():
+                DEV_LOGGER.info("Remove writable snapshot: %s")
+                assert p.is_dir()
+                sh.btrfs.subvolume.delete(p)
+            writable_snapshot_dir.rmdir()
+
         if self.config.images_snapshot_dir_full.is_dir():
-            for p in self.config.images_snapshot_dir_full.iterdir():
-                p.unlink()
-            self.config.images_snapshot_dir_full.rmdir()
+            DEV_LOGGER.info(
+                "Removing directory: %s", self.config.images_snapshot_dir_full)
+            shutil.rmtree(self.config.images_snapshot_dir_full)

@@ -11,4 +11,4 @@ ENTRY_TEMPLATE =
     title Arch Linux (Snapshot {entry.title_suffix})
     linux {entry.kernel_image_path}
     initrd {entry.initramfs_image_path}
-    options cryptdevice=UUID=d79c85d5-0ed6-4b92-b3dd-e7b6fc7dee9f:aeryn-root-crypt root=/dev/mapper/aeryn-root-crypt quiet rw rootflags=subvol=@/.snapshots/{entry.num}/snapshot
+    options cryptdevice=UUID=d79c85d5-0ed6-4b92-b3dd-e7b6fc7dee9f:aeryn-root-crypt root=/dev/mapper/aeryn-root-crypt quiet rw rootflags=subvol={entry.subvol}
