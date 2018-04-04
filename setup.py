@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 setup(
     name="snapper_systemd_boot",
     description="Generate systemd-boot entries from snapper btrfs snapshots.",
-    version="0.1.0-prealpha",
+    version="0.1.0-prealpha1",
     packages=find_packages(),
     install_requires=[
         "reprutils",
