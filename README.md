@@ -135,3 +135,6 @@ fix an issue, but its probably a good idea to have at least one snapshot using
     * While I quite like `reprutils` as a way to cleanly define a `repr`
       that's std compliant, I could probably do without it.
     * My limited use of the `sh` equally could probably be replaced with stdlib.
+* Package on Pypi
+* AUR package
+* CI
