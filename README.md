@@ -17,6 +17,32 @@ At least read all the `README.md`. One specific warning though **there may be
 unintended consequences if snapper, or snapper_systemd_boot run while booted
 into a snapshot. BUYER BEWARE!** 
 
+# Testing
+I started with good intentions, but I've been really naughty with the testing. 
+
+Early on I was using a lot of pre-canned tests to help me develop the thing but
+I didn't have time to invest in mocking out DBUS or btrfs functions so most of
+the tests expect real config and call out to real snapper or btrfs. 
+
+Some even write to disk in a way that may be dangerous. 
+
+I've marked tests appropriately and you can see which groups to run with;
+
+```
+pytest --markers
+```
+
+running tests with;
+
+```
+pytest -m "not dangerous" --pylama"
+```
+
+is safe, if not particularly comprehensive, and what I do most the time.
+
+It'd be nice to have some integration tests. I think I might be able to do
+something with a docker container (it'd probably need privileged to work)
+or maybe LXC containers, but I haven't had much chance to play with the latter.
 
 # My environment
 So that others can understand how to use this tool and design decisions.
@@ -77,7 +103,7 @@ I personally use this
 
 However this doesn't allow us to boot using those backed up kernel and initramfs
 image as they are inaccessible at boot.
-Equally, I didn't want to copy every single image to the boot partitias that'd
+Equally, I didn't want to copy every single image to the boot partition that'd
 eat a lot of space on fat partition UEFI uses.
 
 I wanted to have the option to copy the kernal and initramfs image for some
@@ -101,3 +127,4 @@ fix an issue, but its probably a good idea to have at least one snapshot using
 * Add example hooks.
 * Protection around snapper or `snapper_systemd_boot` running while booted into
   snapshot.
+* Ability to test functionality around btrfs and snapper calls.

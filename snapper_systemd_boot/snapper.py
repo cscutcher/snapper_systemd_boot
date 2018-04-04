@@ -12,13 +12,16 @@ from pathlib import Path
 import logging
 
 from reprutils import GetattrRepr
+import pytest
 
 import dbus
 
 DEV_LOGGER = logging.getLogger(__name__)
 
 
+@pytest.mark.real_config
 def test_get_snapshots(snapper):
+    """Test we can access snapshots via dbus."""
     snapshot = next(snapper.get_snapshots_iter("root"))
     assert snapshot.description == "current"
 

@@ -18,7 +18,14 @@ def inst(snapper, config):
     return SnapperSystemDBootManager(snapper, config)
 
 
+@pytest.mark.real_config
 def test_get_root_config(inst):
+    """
+    Check we can access root snapper config.
+
+    I.e. use the real snapper dbus interface and try and locate the config used
+    to back up the root path `/`.
+    """
     root_config = inst.get_root_config()
     name, path, config = inst.snapper.snapper.GetConfig(root_config.name)
 
@@ -26,11 +33,24 @@ def test_get_root_config(inst):
     assert path == str(root_config.path) == "/"
 
 
+@pytest.mark.real_config
+@pytest.mark.dangerous
 def test_write_entries(inst):
+    """
+    Run entry generation and write to disk.
+
+    TODO: This is only barely a test. Actually assert on something!
+    """
     inst.write_boot_entries()
 
 
+@pytest.mark.real_config
 def test_generate_entries(inst):
+    """
+    Test generation of entries.
+
+    TODO: This is only barely a test. Actually assert on something!
+    """
     for entry in inst.get_boot_entries():
         print(entry)
 
@@ -143,6 +163,9 @@ class BootEntry:
 class SnapperSystemDBootManager:
     """
     Manage systemd-boot entries derived from snapper snapshots.
+
+    TODO: Make the writable snapshot generation easier to safely test.
+    TODO: Make the kernel and initramfs generation easier to safely test.
     """
 
     def __init__(self, snapper, config):
