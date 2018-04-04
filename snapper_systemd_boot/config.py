@@ -51,6 +51,6 @@ class SnapperSystemDBootConfig:
         entry_template="entry_template",
         kernel_image_source="kernel_image_source",
         initramfs_image_source="initramfs_image_source",
-        image_snapshot_dir="image_snapshot_dir",
+        images_snapshot_dir="images_snapshot_dir",
         boot_path="boot_path",
     )
